@@ -35,7 +35,7 @@ namespace Backend.Services
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: creds
             );
 

@@ -1,69 +1,120 @@
 # Auth-token
-backend frontend token
-Arquitectura y capas
 
-El sistema sigue una arquitectura tipo N capas:
+## Descripción general
 
-1 Capa de presentación (Frontend)
+Este proyecto es un sistema de gestión de tareas con autenticación basada en JWT. Está organizado como un monolito con:
 
-Angular maneja toda la interacción con el usuario.
+- Un backend en ASP.NET Core 10
+- Un frontend estático en HTML/CSS/JavaScript
+- Una base de datos MySQL para usuarios y tareas
 
-Componentes principales:
+El backend es el servicio funcional y el frontend consume sus endpoints para registrar usuarios, iniciar sesión, crear tareas y listar tareas del usuario autenticado.
 
-LoginComponent: formulario de login.
+## Estructura del proyecto
 
-TareasComponent: lista y creación de tareas.
+- `backend/`
+  - `Program.cs`: configuración de servicios, autenticación JWT, CORS y mapeo de controladores.
+  - `Controllers/`
+    - `AuthController.cs`: registro y login de usuarios.
+    - `TareasController.cs`: endpoints protegidos de creación y listado de tareas.
+  - `Data/`
+    - `AppDbContext.cs`: contexto de Entity Framework Core para MySQL.
+  - `Models/`
+    - `Usuario.cs`, `Tarea.cs`: modelos de datos.
+  - `Services/`
+    - `JwtService.cs`: generación de tokens JWT.
+  - `appsettings.json`: configuración de conexión a MySQL y ajustes JWT.
 
-Se comunica con el backend mediante HTTP requests.
+- `frontend/`
+  - `index.html`: interfaz de usuario principal.
+  - `styles.css`: estilos de la app.
+  - `app.js`: lógica del frontend para interactuar con el backend.
+  - `README.md`: instrucciones de uso del frontend.
 
-2 Capa de negocio (Backend / Services)
+## Cómo funciona
 
-Contiene la lógica de negocio:
+### Autenticación
 
-JwtService: genera y valida tokens JWT.
+1. El usuario se registra enviando `username` y `password` a `POST /api/Auth/register`.
+2. El usuario inicia sesión en `POST /api/Auth/login`.
+3. El backend valida las credenciales y genera un JWT firmado.
+4. El frontend almacena el token en `localStorage` y lo incluye en cada petición protegida.
 
-AuthController: login y autenticación de usuarios.
+### Gestión de tareas
 
-TareasController: creación y listado de tareas asociadas al usuario.
+- `GET /api/tareas`: lista todas las tareas del usuario autenticado.
+- `POST /api/tareas`: crea una nueva tarea y la asigna al usuario que aparece en el JWT.
 
-3 Capa de acceso a datos (Backend / Data)
+El backend extrae el `UsuarioId` directamente del claim del token y lo usa para filtrar y guardar tareas.
 
-AppDbContext: Contexto de EF Core que representa la base de datos.
+## Tecnologías usadas
 
-Acceso a tablas Usuarios y Tareas.
+### Backend
 
-Se encarga de la persistencia y recuperación de datos.
+- ASP.NET Core 10
+- Entity Framework Core 8
+- Pomelo MySQL Provider
+- JWT Bearer Authentication
+- BCrypt para hashing de contraseñas
+- Swagger para documentación de API
 
-Flujo de funcionamiento
+### Frontend
 
-Registro/Login de usuario
+- HTML
+- CSS
+- JavaScript nativo
+- Fetch API para llamadas HTTP
 
-El usuario ingresa su username y password.
+## Configuración y ejecución
 
-El backend valida credenciales y genera un JWT.
+### Backend
 
-El token se retorna al frontend para ser almacenado (ej. localStorage).
+1. Abre la carpeta `backend`.
+2. Ajusta la cadena de conexión en `appsettings.json`:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "server=localhost;user=root;password=admin;database=actividad3"
+   }
+   ```
+3. Ejecuta:
+   ```bash
+   dotnet run
+   ```
+4. El backend quedará disponible en `http://localhost:5167`.
 
-Creación de tareas
+### Frontend
 
-El usuario autenticado envía una petición POST con los datos de la tarea.
+1. Abre la carpeta `frontend`.
+2. Inicia un servidor estático. Por ejemplo:
+   ```bash
+   python -m http.server 5500
+   ```
+3. Abre en el navegador:
+   ```
+   http://localhost:5500
+   ```
 
-El backend obtiene el UsuarioId desde el JWT y lo asigna a la tarea.
+## Flujo de uso
 
-La tarea se guarda en la base de datos.
+1. Registrarse con un nuevo usuario.
+2. Iniciar sesión con ese usuario.
+3. Crear tareas usando el formulario.
+4. Visualizar las tareas asociadas al usuario autenticado.
 
-Listado de tareas
+## Importante
 
-El frontend solicita las tareas del usuario.
+- El frontend fue construido como una app estática ligera, no usa Angular ni frameworks front-end.
+- El backend requiere que el token JWT se envíe en el header `Authorization: Bearer <token>`.
+- CORS ya está habilitado en el backend para permitir peticiones desde el frontend local.
+- El modelo de datos MySQL usa las tablas `usuarios` y `tareas`.
 
-El backend filtra tareas por UsuarioId usando el token JWT.
+## Endpoints principales
 
-JWT tiene un tiempo de expiración de 2 horas.
+- `POST /api/Auth/register`
+- `POST /api/Auth/login`
+- `GET /api/tareas`
+- `POST /api/tareas`
 
-Configura appsettings.json con tu conexión a MySQL
+## Notas finales
 
-Todas las rutas de TareasController están protegidas y requieren Bearer Token.
-
-Las contraseñas se almacenan hashed con BCrypt.
-
-Angular usa standalone components, por lo que no existe app.module.ts.
+Este README describe el estado actual del monolito y cómo ejecutar la solución completa. Si quieres, puedo ayudarte a convertir el frontend en una aplicación React/Vite más avanzada.

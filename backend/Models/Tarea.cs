@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Backend.Models
 {
     public class Tarea
@@ -8,6 +10,7 @@ namespace Backend.Models
         public bool Completada { get; set; } = false;
 
         // Relación con usuario
+        [Column("usuario_id")]
         public int UsuarioId { get; set; }
         public Usuario? Usuario { get; set; }
     }
